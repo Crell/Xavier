@@ -1,0 +1,16 @@
+{
+    "name": "crell/xavier",
+    "description": "An XML Schema reader and generator.",
+    "type": "library",
+    "require-dev": {
+        "phpunit/phpunit": "^8.0"
+    },
+    "license": "GPLv3-or-later",
+    "authors": [
+        {
+            "name": "Larry Garfield",
+            "email": "larry@garfieldtech.com"
+        }
+    ],
+    "require": {}
+}
