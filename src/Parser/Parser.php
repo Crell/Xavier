@@ -38,7 +38,8 @@ class Parser
             $index = count($elements);
             if ($tag['type'] == "complete" || $tag['type'] == "open") {
                 // Build new Element.
-                $elements[$index] = new XmlElement($tag['tag'], $tag['attributes'], $tag['value']);
+                $className = $this->mapTagToClass($tag['tag']);
+                $elements[$index] = new $className($tag['tag'], $tag['attributes'], $tag['value']);
 
                 // Initialize the element's children array.
                 // Then push onto the stack so that the next tag processed
@@ -58,7 +59,10 @@ class Parser
         return $elements[0];  // the single top-level element
     }
 
-
+    protected function mapTagToClass(string $tag) : string
+    {
+        return XmlElement::class;
+    }
 
 
     public function parseFile(string $filename)
