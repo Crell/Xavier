@@ -18,5 +18,7 @@ class ParserTest extends TestCase
         print_r($result);
 
         $this->assertInstanceOf(XmlElement::class, $result);
+        $this->assertEquals('1999-10-20', $result['orderDate']);
+        $this->assertEquals('', (string)$result);
     }
 }
