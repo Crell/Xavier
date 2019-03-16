@@ -7,12 +7,6 @@ use Crell\Xavier\Elements\XmlElement;
 
 class Parser
 {
-    /**
-     * @var resource
-     *
-     * Oh god...
-     */
-    protected $xmlParser;
 
     public function __construct()
     {
