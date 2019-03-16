@@ -1,0 +1,21 @@
+Random thoughts:
+
+Goal: Parse an XSD file and produce class definitions with public properties that represent the elements of the schema.  Then be able to parse an XML document in that schema to produce a class tree in PHP that is pure native PHP objects, so entirely self-documenting.  Ideally also support exporting those classes to XML, too.
+
+Attributes are handled via ArrayAccess.
+
+Child elements are literal properties.
+
+Contents of an element is __toString() (probably?)
+
+This will require building a parser for XSD.  PHP's XML support is total shit so this will be hard.  *Probably* build off of XMLParser (http://php.net/manual/en/book.xml.php), but only if it can handle namespaces properly.  Which it probably can't.
+
+That in turn will probably require a state machine internally to handle parsing the XML in a non-stupid way.  All of the examples are stupid ways.  Really, this is disgusting.
+
+Unclear if the XML->class parser will be separate from the XSD parser.  They may use the same plumbing by necessity.
+
+Ideally, could the XSD parser be written using the XSD parser?  That would be cool, but bootstrapping that will be very manual.
+
+Or this may be a useful shortcut: http://php.net/manual/en/function.xml-parse-into-struct.php
+
+Assuming it plays nicely with namespaces.

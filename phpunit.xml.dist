@@ -10,7 +10,7 @@
          processIsolation="false"
          stopOnFailure="false">
     <testsuites>
-        <testsuite name="Tukio Test Suite">
+        <testsuite name="Xavier Test Suite">
             <directory>tests</directory>
         </testsuite>
     </testsuites>
