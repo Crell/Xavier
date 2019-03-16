@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Crell\Xavier\Parser;
 
+use Crell\Xavier\Elements\XmlElement;
 use PHPUnit\Framework\TestCase;
 
 class ParserTest extends TestCase
@@ -15,5 +16,7 @@ class ParserTest extends TestCase
         $result = $p->parseFile($filename);
 
         print_r($result);
+
+        $this->assertInstanceOf(XmlElement::class, $result);
     }
 }

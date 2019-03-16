@@ -37,9 +37,13 @@ class Parser
         $elements = [];  // the currently filling [child] XmlElement array
         $stack = [];
         foreach ($tags as $tag) {
+            $tag += [
+                'attributes' => [],
+                'value' => '',
+            ];
             $index = count($elements);
             if ($tag['type'] == "complete" || $tag['type'] == "open") {
-                $elements[$index] = new XmlElement();
+                $elements[$index] = new XmlElement($tag['tag'], $tag['attributes'], $tag['value']);
                 $elements[$index]->name = $tag['tag'];
                 $elements[$index]->attributes = $tag['attributes'] ?? [];
                 $elements[$index]->content = $tag['value'] ?? '';
