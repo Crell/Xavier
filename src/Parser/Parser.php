@@ -37,23 +37,29 @@ class Parser
             ];
             $index = count($elements);
             if ($tag['type'] == "complete" || $tag['type'] == "open") {
+                // Build new Element.
                 $elements[$index] = new XmlElement($tag['tag'], $tag['attributes'], $tag['value']);
-                $elements[$index]->name = $tag['tag'];
-                $elements[$index]->attributes = $tag['attributes'] ?? [];
-                $elements[$index]->content = $tag['value'] ?? '';
+
+                // Initialize the element's children array.
+                // Then push onto the stack so that the next tag processed
+                // becomes a child of this element.
                 if ($tag['type'] == "open") {  // push
                     $elements[$index]->children = [];
                     $stack[count($stack)] = &$elements;
                     $elements = &$elements[$index]->children;
                 }
             }
-            if ($tag['type'] == "close") {  // pop
+            // On a closing tag, pop the working parent off the stack.
+            else if ($tag['type'] == "close") {
                 $elements = &$stack[count($stack) - 1];
                 unset($stack[count($stack) - 1]);
             }
         }
         return $elements[0];  // the single top-level element
     }
+
+
+
 
     public function parseFile(string $filename)
     {
