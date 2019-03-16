@@ -41,11 +41,9 @@ class Parser
                 $className = $this->mapTagToClass($tag['tag']);
                 $elements[$index] = new $className($tag['tag'], $tag['attributes'], $tag['value']);
 
-                // Initialize the element's children array.
-                // Then push onto the stack so that the next tag processed
-                // becomes a child of this element.
+                // If this element has children, push it onto the stack so that the next element
+                // processed is registered as a child of it.
                 if ($tag['type'] == "open") {  // push
-                    $elements[$index]->children = [];
                     $stack[count($stack)] = &$elements;
                     $elements = &$elements[$index]->children;
                 }

@@ -5,10 +5,33 @@ namespace Crell\Xavier\Elements;
 
 class XmlElement implements \ArrayAccess
 {
-    public $name;
-    public $attributes;
-    public $content;
-    public $children;
+    /**
+     * The tag name of this element.
+     *
+     * @var string
+     */
+    protected $name = '';
+
+    /**
+     * Attributes on this element.
+     *
+     * @var array
+     */
+    protected $attributes = [];
+
+    /**
+     * The textual body of the element.
+     *
+     * @var string
+     */
+    protected $content = '';
+
+    /**
+     * Child elements not otherwise accounted for by a property.
+     *
+     * @var XmlElement[]
+     */
+    public $children = [];
 
     public function __construct($name, array $attributes = [], string $content = '')
     {
