@@ -40,13 +40,13 @@ class ParserTest extends TestCase
         $this->assertEquals('1999-10-20', $result['orderDate']);
         $this->assertEquals('', (string)$result);
 
-        $this->assertInstanceOf(shipTo::class, $result->children[0]);
-        $this->assertInstanceOf(billTo::class, $result->children[1]);
-        $this->assertInstanceOf(comment::class, $result->children[2]);
-        $this->assertEquals('Hurry, my lawn is going wild', $result->children[2]);
+        $this->assertInstanceOf(shipTo::class, $result->shipTo);
+        $this->assertInstanceOf(billTo::class, $result->billTo);
+        $this->assertInstanceOf(comment::class, $result->comment);
+        $this->assertEquals('Hurry, my lawn is going wild', $result->comment);
 
-        $this->assertInstanceOf(XmlElement::class, $result->children[0]->children[0]);
-        $this->assertEquals('Alice Smith', $result->children[0]->children[0]);
+        $this->assertInstanceOf(XmlElement::class, $result->shipTo->name);
+        $this->assertEquals('Alice Smith', $result->shipTo->name);
 
     }
 }

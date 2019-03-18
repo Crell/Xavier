@@ -30,31 +30,61 @@ class Parser
 
         $elements = [];  // the currently filling [child] XmlElement array
         $stack = [];
+
+        $parentStack = [];
         foreach ($tags as $tag) {
             $tag += [
                 'attributes' => [],
                 'value' => '',
             ];
-            $index = count($elements);
+            $index = count($parentStack);
+            switch ($tag['type']) {
+                case 'open':
+                    // Build new Element.
+                    $className = $this->mapTagToClass($tag['tag']);
+                    $element = new $className($tag['tag'], $tag['attributes'], $tag['value']);
+                    if ($index != 0) {
+                        $parentStack[$index - 1]->{$tag['tag']} = $element;
+                    }
+                    $parentStack[] = $element;
+                    break;
+                case 'complete':
+                    // Build new Element.
+                    $className = $this->mapTagToClass($tag['tag']);
+                    $element = new $className($tag['tag'], $tag['attributes'], $tag['value']);
+                    if ($index != 0) {
+                        $parentStack[$index - 1]->{$tag['tag']} = $element;
+                    }
+                    break;
+                case 'close':
+                    $ret = array_pop($parentStack);
+                    break;
+            }
+            /*
             if ($tag['type'] == "complete" || $tag['type'] == "open") {
-                // Build new Element.
-                $className = $this->mapTagToClass($tag['tag']);
-                $elements[$index] = new $className($tag['tag'], $tag['attributes'], $tag['value']);
+
+                if ($index == 0) {
+                    $parentStack[] = $element;
+                }
+                else {
+                }
 
                 // If this element has children, push it onto the stack so that the next element
                 // processed is registered as a child of it.
-                if ($tag['type'] == "open") {  // push
-                    $stack[count($stack)] = &$elements;
-                    $elements = &$elements[$index]->children;
+                if ($tag['type'] == "open") {
+//                    $stack[count($stack)] = &$elements;
+//                    $elements = &$elements[$index]->children;
                 }
             }
             // On a closing tag, pop the working parent off the stack.
             else if ($tag['type'] == "close") {
-                $elements = &$stack[count($stack) - 1];
-                unset($stack[count($stack) - 1]);
+//                $elements = &$stack[count($stack) - 1];
+//                unset($stack[count($stack) - 1]);
             }
+            */
         }
-        return $elements[0];  // the single top-level element
+        return $ret;
+//        return $elements[0];  // the single top-level element
     }
 
     protected function mapTagToClass(string $tag) : string
