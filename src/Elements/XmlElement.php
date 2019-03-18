@@ -10,21 +10,21 @@ class XmlElement implements \ArrayAccess
      *
      * @var string
      */
-    protected $name = '';
+    protected $_name = '';
 
     /**
      * Attributes on this element.
      *
      * @var array
      */
-    protected $attributes = [];
+    protected $_attributes = [];
 
     /**
      * The textual body of the element.
      *
      * @var string
      */
-    protected $content = '';
+    protected $_content = '';
 
     /**
      * Child elements not otherwise accounted for by a property.
@@ -35,33 +35,33 @@ class XmlElement implements \ArrayAccess
 
     public function __construct($name, array $attributes = [], string $content = '')
     {
-        $this->name = $name;
-        $this->attributes = $attributes;
-        $this->content = $content;
+        $this->_name = $name;
+        $this->_attributes = $attributes;
+        $this->_content = $content;
     }
 
     public function offsetExists($offset)
     {
-        return array_key_exists($offset, $this->attributes);
+        return array_key_exists($offset, $this->_attributes);
     }
 
     public function offsetGet($offset)
     {
-        return $this->attributes[$offset];
+        return $this->_attributes[$offset];
     }
 
     public function offsetSet($offset, $value)
     {
-        $this->attributes[$offset] = $value;
+        $this->_attributes[$offset] = $value;
     }
 
     public function offsetUnset($offset)
     {
-        unset($this->attributes[$offset]);
+        unset($this->_attributes[$offset]);
     }
 
     public function __toString()
     {
-        return $this->content;
+        return $this->_content;
     }
 }
