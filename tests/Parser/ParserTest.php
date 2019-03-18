@@ -6,6 +6,7 @@ namespace Crell\Xavier\Parser;
 use Crell\Xavier\Elements\XmlElement;
 use Crell\Xavier\Parser\Elements\billTo;
 use Crell\Xavier\Parser\Elements\comment;
+use Crell\Xavier\Parser\Elements\emptyRoot;
 use Crell\Xavier\Parser\Elements\purchaseOrder;
 use Crell\Xavier\Parser\Elements\shipTo;
 use PHPUnit\Framework\TestCase;
@@ -19,6 +20,7 @@ class MockParser extends Parser
             'shipTo' => shipTo::class,
             'billTo' => billTo::class,
             'comment' => comment::class,
+            'emptyRoot' => emptyRoot::class,
         ];
 
         return $map[$tag] ?? parent::mapTagToClass($tag);
@@ -47,6 +49,16 @@ class ParserTest extends TestCase
 
         $this->assertInstanceOf(XmlElement::class, $result->shipTo->name);
         $this->assertEquals('Alice Smith', $result->shipTo->name);
+    }
 
+    public function test_xml_with_empty_root_parses_without_error() : void
+    {
+        $filename = __DIR__ . '/../testdata/emptyRoot.xml';
+        $p = new MockParser();
+        $result = $p->parseFile($filename);
+
+        $this->assertInstanceOf(emptyRoot::class, $result);
+        $this->assertEquals('foo', $result['a']);
+        $this->assertEquals('bar', $result['b']);
     }
 }
