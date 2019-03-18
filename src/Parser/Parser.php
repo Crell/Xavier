@@ -15,7 +15,7 @@ class Parser
     /**
      *
      *
-     * Originally based on http://php.net/manual/en/function.xml-parse-into-struct.php#66487
+     * Originally inspired on http://php.net/manual/en/function.xml-parse-into-struct.php#66487
      *
      * @param string $xml
      * @return XmlElement
@@ -24,63 +24,36 @@ class Parser
     {
         $tags = $this->parseTags($xml);
 
-        $elements = [];  // the currently filling [child] XmlElement array
-        $stack = [];
+        // The first element gets special handling, because fence-posting. This makes the code below considerably
+        // simpler as it has fewer edge cases to deal with, and we also then always know what the element to return is.
+        $tag = array_shift($tags);
+        $className = $this->mapTagToClass($tag['tag']);
+        $rootElement = new $className($tag['tag'], $tag['attributes'], $tag['value']);
 
-        $parentStack = [];
+        $parentStack = [$rootElement];
         foreach ($tags as $tag) {
-            $tag += [
-                'attributes' => [],
-                'value' => '',
-            ];
             $index = count($parentStack);
-            switch ($tag['type']) {
-                case 'open':
-                    // Build new Element.
-                    $className = $this->mapTagToClass($tag['tag']);
-                    $element = new $className($tag['tag'], $tag['attributes'], $tag['value']);
-                    if ($index != 0) {
-                        $parentStack[$index - 1]->{$tag['tag']} = $element;
-                    }
-                    $parentStack[] = $element;
-                    break;
-                case 'complete':
-                    // Build new Element.
-                    $className = $this->mapTagToClass($tag['tag']);
-                    $element = new $className($tag['tag'], $tag['attributes'], $tag['value']);
-                    if ($index != 0) {
-                        $parentStack[$index - 1]->{$tag['tag']} = $element;
-                    }
-                    break;
-                case 'close':
-                    $ret = array_pop($parentStack);
-                    break;
-            }
-            /*
-            if ($tag['type'] == "complete" || $tag['type'] == "open") {
+            if (in_array($tag['type'], ['open', 'complete'])) {
+                // Build new Element.
+                $className = $this->mapTagToClass($tag['tag']);
+                $element = new $className($tag['tag'], $tag['attributes'], $tag['value']);
 
-                if ($index == 0) {
+                // Assign this element to a property of the parent element, based on its name.
+                // @todo Optionally error if the parent property is not defined.
+                $parentStack[$index - 1]->{$tag['tag']} = $element;
+
+                // If the element is going to have children, push it onto the stack so the following elements are added
+                // as its children.
+                if ($tag['type'] == 'open') {
                     $parentStack[] = $element;
                 }
-                else {
-                }
-
-                // If this element has children, push it onto the stack so that the next element
-                // processed is registered as a child of it.
-                if ($tag['type'] == "open") {
-//                    $stack[count($stack)] = &$elements;
-//                    $elements = &$elements[$index]->children;
-                }
             }
-            // On a closing tag, pop the working parent off the stack.
-            else if ($tag['type'] == "close") {
-//                $elements = &$stack[count($stack) - 1];
-//                unset($stack[count($stack) - 1]);
+            elseif ($tag['type'] == 'close') {
+                // We're done with a child-carrying element, so pop it off the stack.
+                array_pop($parentStack);
             }
-            */
         }
-        return $ret;
-//        return $elements[0];  // the single top-level element
+        return $rootElement;
     }
 
     protected function mapTagToClass(string $tag) : string
@@ -95,6 +68,14 @@ class Parser
         xml_parser_set_option($parser, XML_OPTION_SKIP_WHITE, 1);
         xml_parse_into_struct($parser, $xml, $tags);
         xml_parser_free($parser);
+
+        // Ensure all properties are always defined so that we don't have to constantly check for missing values later.
+        array_walk($tags, function(&$tag) {
+            $tag += [
+                'attributes' => [],
+                'value' => '',
+            ];
+        });
 
         return $tags;
     }
