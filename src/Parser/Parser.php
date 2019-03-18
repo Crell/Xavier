@@ -22,11 +22,7 @@ class Parser
      */
     public function parse(string $xml) : XmlElement
     {
-        $parser = xml_parser_create();
-        xml_parser_set_option($parser, XML_OPTION_CASE_FOLDING, 0);
-        xml_parser_set_option($parser, XML_OPTION_SKIP_WHITE, 1);
-        xml_parse_into_struct($parser, $xml, $tags);
-        xml_parser_free($parser);
+        $tags = $this->parseTags($xml);
 
         $elements = [];  // the currently filling [child] XmlElement array
         $stack = [];
@@ -92,6 +88,16 @@ class Parser
         return XmlElement::class;
     }
 
+    protected function parseTags(string $xml) : array
+    {
+        $parser = xml_parser_create();
+        xml_parser_set_option($parser, XML_OPTION_CASE_FOLDING, 0);
+        xml_parser_set_option($parser, XML_OPTION_SKIP_WHITE, 1);
+        xml_parse_into_struct($parser, $xml, $tags);
+        xml_parser_free($parser);
+
+        return $tags;
+    }
 
     public function parseFile(string $filename)
     {
