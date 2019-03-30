@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Crell\Xavier\Parser;
 
 use Crell\Xavier\Elements\XmlElement;
+use Crell\Xavier\NoElementClassFound;
 use Crell\Xavier\Parser\Elements\billTo;
 use Crell\Xavier\Parser\Elements\comment;
 use Crell\Xavier\Parser\Elements\emptyRoot;
@@ -49,6 +50,15 @@ class ParserTest extends TestCase
 
         $this->assertInstanceOf(XmlElement::class, $result->shipTo->name);
         $this->assertEquals('Alice Smith', $result->shipTo->name);
+    }
+
+    public function test_strict_mode_rejects_incomplete_class_definitions() : void
+    {
+        $this->expectException(NoElementClassFound::class);
+
+        $filename = __DIR__ . '/../testdata/po.xml';
+        $p = new MockParser(true);
+        $result = $p->parseFile($filename);
     }
 
     public function test_xml_with_empty_root_parses_without_error() : void

@@ -4,12 +4,23 @@ declare(strict_types=1);
 namespace Crell\Xavier\Parser;
 
 use Crell\Xavier\Elements\XmlElement;
+use Crell\Xavier\NoElementClassFound;
 
 class Parser
 {
 
-    public function __construct()
+    /**
+     * True if a missing class or property should throw an exception.
+     *
+     * False to fallback to the generic class and dynamic properties.
+     *
+     * @var bool
+     */
+    protected $strict = false;
+
+    public function __construct(bool $strict = false)
     {
+        $this->strict = $strict;
     }
 
     /**
@@ -58,6 +69,11 @@ class Parser
 
     protected function mapTagToClass(string $tag) : string
     {
+        // If we fall back as far as the default in strict mode, it means there was a missing class element definition.
+        if ($this->strict) {
+            throw NoElementClassFound::create($tag);
+        }
+
         return XmlElement::class;
     }
 
