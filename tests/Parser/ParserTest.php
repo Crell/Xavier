@@ -63,9 +63,9 @@ class ParserTest extends TestCase
 
     public function test_xml_with_empty_root_parses_without_error() : void
     {
-        $filename = __DIR__ . '/../testdata/emptyRoot.xml';
+        $xml = "<emptyRoot a=\"foo\" b=\"bar\" />";
         $p = new MockParser();
-        $result = $p->parseFile($filename);
+        $result = $p->parse($xml);
 
         $this->assertInstanceOf(emptyRoot::class, $result);
         $this->assertEquals('foo', $result['a']);
