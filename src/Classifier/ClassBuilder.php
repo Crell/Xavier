@@ -66,4 +66,17 @@ END;
 
         return $out;
     }
+
+    /**
+     * Evaluates this class and declares it in the current process.
+     *
+     * Warning: This means using eval() to add runable code to the current
+     * process. That is a wonderful code injection attack vector unless you're
+     * super careful.  Do not let user-provided data anywhere near this class
+     * unless you really really know what you're doing.
+     */
+    public function declare() : void
+    {
+        eval((string)$this);
+    }
 }

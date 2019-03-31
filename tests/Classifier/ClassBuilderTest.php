@@ -5,6 +5,9 @@ namespace Crell\Xavier\Classifier;
 
 use PHPUnit\Framework\TestCase;
 
+/**
+ * @runTestsInSeparateProcesses
+ */
 class ClassBuilderTest extends TestCase
 {
 
@@ -74,5 +77,15 @@ END;
         $this->assertEquals($expected, (string)$b);
     }
 
+    public function test_eval_of_generated_class_parses() : void
+    {
+        $b = (new ClassBuilder('Foo', 'My\Name\Space'))
+            ->addProperty(new PropertyDefinition('thing', 'public', 'string'))
+            ->addProperty(new PropertyDefinition('stuff', 'protected', 'int'));
 
+        $b->declare();
+
+        $this->assertClassHasAttribute('thing', 'My\Name\Space\Foo');
+        $this->assertClassHasAttribute('stuff', 'My\Name\Space\Foo');
+    }
 }
