@@ -5,6 +5,7 @@ namespace Crell\Xavier\Parser;
 
 use Crell\Xavier\Elements\XmlElement;
 use Crell\Xavier\NoElementClassFound;
+use Crell\Xavier\NoPropertyFound;
 
 class Parser
 {
@@ -48,6 +49,19 @@ class Parser
                 // Build new Element.
                 $className = $this->mapTagToClass($tag['tag']);
                 $element = new $className($tag['tag'], $tag['attributes'], $tag['value']);
+
+                // In strict mode, use reflection to ensure that the parent element has
+                // a properly named property.
+                if ($this->strict) {
+                    try {
+                        $reflect = new \ReflectionObject($parentStack[$index - 1]);
+                        // This will throw a ReflectionException if the property does not exist.
+                        $reflect->getProperty($tag['tag']);
+                    }
+                    catch (\ReflectionException $e) {
+                        throw NoPropertyFound::create($reflect->name, $tag['tag']);
+                    }
+                }
 
                 // Assign this element to a property of the parent element, based on its name.
                 // @todo Optionally error if the parent property is not defined.

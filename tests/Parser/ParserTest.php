@@ -7,6 +7,7 @@ use Crell\Xavier\Classifier\ClassBuilder;
 use Crell\Xavier\Classifier\PropertyDefinition;
 use Crell\Xavier\Elements\XmlElement;
 use Crell\Xavier\NoElementClassFound;
+use Crell\Xavier\NoPropertyFound;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -50,7 +51,7 @@ class ParserTest extends TestCase
 
         $ns = 'Test\Space';
         // This is a very incomplete list.
-        $map['purchaseOrder'] = $this->declareElement('purchaseOrder', $ns);
+        $map['purchaseOrder'] = $this->declareElement('purchaseOrder', $ns, ['shipTo', 'billTo']);
         $map['billTo'] = $this->declareElement('billTo', $ns);
         $map['shipTo'] = $this->declareElement('shipTo', $ns);
 
@@ -60,11 +61,31 @@ class ParserTest extends TestCase
         $result = $p->parseFile($filename);
     }
 
+    public function test_strict_mode_rejects_missing_property_definitions() : void
+    {
+        $this->expectException(NoPropertyFound::class);
+
+        $ns = 'Test\Space';
+        // This is a very incomplete list.
+        $map['purchaseOrder'] = $this->declareElement('purchaseOrder', $ns);
+        $map['comment'] = $this->declareElement('comment', $ns);
+
+        $p = $this->makeParser($map, true);
+
+        $xml = <<<XML
+  <purchaseOrder orderDate="1999-10-20">
+    <comment>Hurry, my lawn is going wild</comment>
+</purchaseOrder>
+XML;
+
+        $result = $p->parse($xml);
+    }
+
     public function test_strict_mode_accepts_fully_defined_classes() : void
     {
         $ns = 'Test\Space';
         // This is a very incomplete list.
-        $map['purchaseOrder'] = $this->declareElement('purchaseOrder', $ns);
+        $map['purchaseOrder'] = $this->declareElement('purchaseOrder', $ns, ['shipTo', 'billTo']);
         $map['billTo'] = $this->declareElement('billTo', $ns);
         $map['shipTo'] = $this->declareElement('shipTo', $ns);
 
@@ -80,42 +101,10 @@ class ParserTest extends TestCase
 </purchaseOrder>
 END;
 
-        $filename = __DIR__ . '/../testdata/po.xml';
         $result = $p->parse($xml);
 
         $this->assertInstanceOf($map['purchaseOrder'], $result);
     }
-
-    /*
-    public function test_strict_mode_rejects_missing_property_definitions() : void
-    {
-        $this->expectException(NoPropertyFound::class);
-
-        $xml = <<<XML
-  <purchaseOrder orderDate="1999-10-20">
-    <comment>Hurry, my lawn is going wild</comment>
-    <items>
-        <item partNum="872-AA">
-            <productName>Lawnmower</productName>
-            <quantity>1</quantity>
-            <USPrice>148.95</USPrice>
-            <comment>Confirm this is electric</comment>
-        </item>
-        <item partNum="926-AA">
-            <productName>Baby Monitor</productName>
-            <quantity>1</quantity>
-            <USPrice>39.98</USPrice>
-            <shipDate>1999-05-21</shipDate>
-        </item>
-    </items>
-</purchaseOrder>
-XML;
-
-    $filename = __DIR__ . '/../testdata/po.xml';
-        $p = new MockParser(true);
-        $result = $p->parseFile($filename);
-    }
-*/
 
     public function test_xml_with_empty_root_parses_without_error() : void
     {
