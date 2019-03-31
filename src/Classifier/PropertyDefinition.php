@@ -24,6 +24,7 @@ class PropertyDefinition
         $this->name = $name;
         $this->visibility = $visibility;
         $this->type = $type;
+        $this->default = $default;
     }
 
     public function __toString()

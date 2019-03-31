@@ -36,17 +36,25 @@ class ClassBuilder
         return $this;
     }
 
+    public function fqcn() : string
+    {
+        return "\\{$this->namespace}\\{$this->className}";
+    }
+
+    protected function stringer($x) : string
+    {
+        return (string)$x;
+    }
+
     public function __toString()
     {
         $out = '';
 
-        $stringer = function($x) : string { return (string)$x; };
-
-        $props = implode("\n\n", array_map($stringer, $this->properties));
+        $props = implode("\n\n", array_map([$this, 'stringer'], $this->properties));
 
         $parent = '';
         if ($this->parent) {
-            $parent = "extends {$this->parent}";
+            $parent = "extends \\{$this->parent}";
         }
 
         $out = <<<END

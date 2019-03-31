@@ -43,7 +43,8 @@ END;
 
     public function test_parent_class_generates_correctly() : void
     {
-        $b = new ClassBuilder('Foo', 'My\Name\Space', '\Some\ParentClass');
+        // The ::class magic constant doesn't have a leading \, so don't include one here.
+        $b = new ClassBuilder('Foo', 'My\Name\Space', 'Some\ParentClass');
 
         $expected = <<<'END'
 namespace My\Name\Space {
