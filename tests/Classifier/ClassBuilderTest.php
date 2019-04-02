@@ -89,4 +89,21 @@ END;
         $this->assertClassHasAttribute('thing', 'My\Name\Space\Foo');
         $this->assertClassHasAttribute('stuff', 'My\Name\Space\Foo');
     }
+
+    public function test_default_value_parses() : void
+    {
+        try {
+            $b = (new ClassBuilder('Foo', 'My\Name\Space'))
+                ->addProperty(new PropertyDefinition('thing', 'public', 'string', 'foo'))
+                ->addProperty(new PropertyDefinition('stuff', 'protected', 'int', '5'))
+                ->addProperty(new PropertyDefinition('arr', 'public', 'array', ['foo' => 'bar']));
+
+            $b->declare();
+
+            $this->assertClassHasAttribute('thing', 'My\Name\Space\Foo');
+        }
+        catch (\ParseError $e) {
+            $this->fail($e->getMessage());
+        }
+    }
 }

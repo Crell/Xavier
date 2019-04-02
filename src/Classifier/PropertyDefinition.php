@@ -38,7 +38,7 @@ class PropertyDefinition
         $out .= "{$this->visibility} \${$this->name}";
 
         if ($this->default) {
-            $out .= var_export($this->default);
+            $out .= ' = ' . var_export($this->default, true);
         }
 
         $out .= ';';
