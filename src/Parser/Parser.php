@@ -33,8 +33,19 @@ class Parser
      */
     protected $globalNamespace = '';
 
-    public function __construct(bool $strict = false)
+    /**
+     * Parser constructor.
+     *
+     * @param string $phpNs
+     *   The namespace of PHP classes that should be used for the "global" namespace
+     *   within the XML document.
+     * @param bool $strict
+     *   If true, missing class or property definitions will result in an exception.
+     *   If false, a generic fallback class will be used instead.
+     */
+    public function __construct(string $phpNs, bool $strict = false)
     {
+        $this->globalNamespace = $phpNs;
         $this->strict = $strict;
     }
 
@@ -55,12 +66,6 @@ class Parser
     {
         $this->namespaces[$xmlNs] = $phpNs;
 
-        return $this;
-    }
-
-    public function setGlobalNamespace(string $phpNs) : self
-    {
-        $this->globalNamespace = $phpNs;
         return $this;
     }
 

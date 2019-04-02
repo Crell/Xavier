@@ -25,8 +25,7 @@ class ParserTest extends TestCase
         $map['shipTo'] = $this->declareElement('shipTo', $ns);
         $map['comment'] = $this->declareElement('comment', $ns);
 
-        $p = new Parser();
-        $p->setGlobalNamespace($ns);
+        $p = new Parser($ns);
 
         $filename = __DIR__ . '/../testdata/po.xml';
         $result = $p->parseFile($filename);
@@ -56,8 +55,7 @@ class ParserTest extends TestCase
         $map['billTo'] = $this->declareElement('billTo', $ns);
         $map['shipTo'] = $this->declareElement('shipTo', $ns);
 
-        $p = new Parser(true);
-        $p->setGlobalNamespace($ns);
+        $p = new Parser($ns, true);
 
         $filename = __DIR__ . '/../testdata/po.xml';
         $result = $p->parseFile($filename);
@@ -72,8 +70,7 @@ class ParserTest extends TestCase
         $map['purchaseOrder'] = $this->declareElement('purchaseOrder', $ns);
         $map['comment'] = $this->declareElement('comment', $ns);
 
-        $p = new Parser(true);
-        $p->setGlobalNamespace($ns);
+        $p = new Parser($ns,true);
 
         $xml = <<<XML
   <purchaseOrder orderDate="1999-10-20">
@@ -92,8 +89,7 @@ XML;
         $map['billTo'] = $this->declareElement('billTo', $ns);
         $map['shipTo'] = $this->declareElement('shipTo', $ns);
 
-        $p = new Parser(true);
-        $p->setGlobalNamespace($ns);
+        $p = new Parser($ns, true);
 
         $xml = <<<END
 <?xml version="1.0"?>
@@ -115,8 +111,7 @@ END;
         $ns = 'Test\Space';
         $map['emptyRoot'] = $this->declareElement('emptyRoot', $ns);
 
-        $p = new Parser();
-        $p->setGlobalNamespace($ns);
+        $p = new Parser($ns);
 
         $xml = "<emptyRoot a=\"foo\" b=\"bar\" />";
         $result = $p->parse($xml);
@@ -140,7 +135,7 @@ END;
         $map['thing'] = $this->declareElement('thing', $phpNs, ['stuff']);
         $map['stuff'] = $this->declareElement('stuff', $phpNs);
 
-        $p = new Parser();
+        $p = new Parser($phpNs);
         $p->addNamespace('http://example.com/namespace', 'Test\Space');
 
         $result = $p->parse($xml);
