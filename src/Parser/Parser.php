@@ -64,7 +64,6 @@ class Parser
                 }
 
                 // Assign this element to a property of the parent element, based on its name.
-                // @todo Optionally error if the parent property is not defined.
                 $parentStack[$index - 1]->{$tag['tag']} = $element;
 
                 // If the element is going to have children, push it onto the stack so the following elements are added
