@@ -142,7 +142,40 @@ END;
 
         $this->assertInstanceOf("$phpNs\\thing", $result);
         $this->assertInstanceOf("$phpNs\\stuff", $result->stuff);
+    }
 
+    public function test_xml_with_multiple_namespaces_parses_to_objects() : void
+    {
+        $xml = <<<END
+<myns:thing xmlns:myns="http://example.com/namespace" xmlns:yourns="http://example.com/other">
+    <myns:stuff>
+        <yourns:beep>
+            Stuff goes here.
+        </yourns:beep>
+        <yourns:stuff>
+            Someone else's stuff goes here.
+        </yourns:stuff>
+</myns:stuff>
+</thing>
+END;
+
+        $myNs = 'My\Ns';
+        $yourNs = 'Your\Ns';
+        $this->declareElement('thing', $myNs, ['stuff']);
+        $this->declareElement('stuff', $myNs, ['beep', 'stuff']);
+        $this->declareElement('beep', $yourNs);
+        $this->declareElement('stuff', $yourNs);
+
+        $p = new Parser('');
+        $p->addNamespace('http://example.com/namespace', $myNs);
+        $p->addNamespace('http://example.com/other', $yourNs);
+
+        $result = $p->parse($xml, true);
+
+        $this->assertInstanceOf("$myNs\\thing", $result);
+        $this->assertInstanceOf("$myNs\\stuff", $result->stuff);
+        $this->assertInstanceOf("$yourNs\\beep", $result->stuff->beep);
+        $this->assertInstanceOf("$yourNs\\stuff", $result->stuff->stuff);
     }
 
     /**
