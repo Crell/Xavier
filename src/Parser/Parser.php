@@ -162,6 +162,18 @@ class Parser
         return strpos($key, 'xmlns:') !== false;
     }
 
+    /**
+     * Maps an XML tag to the corresponding PHP class.
+     *
+     * @param string $tagName
+     *   The name of the tag, without a namespace prefix.
+     * @param string $tagNamespace
+     *   The namespace prefix, if any.
+     * @param array $namespaceMap
+     *   An map of namespace short names to URIs, as produced by getDeclaredNamespaces().
+     * @return string
+     *   The FQCN of the PHP class this tag maps to.
+     */
     protected function mapTagToClass(string $tagName, string $tagNamespace, array $namespaceMap) : string
     {
         // Map the tag namespace to a PHP namespace.
@@ -182,6 +194,17 @@ class Parser
         return $className;
     }
 
+    /**
+     * Parses an XML string into a nested array of tag definitions.
+     *
+     * @see https://www.php.net/manual/en/function.xml-parse-into-struct.php
+     *
+     * @param string $xml
+     *   A well-formed XML string to parse.
+     * @return array
+     *   A nested array of tag definitions.  The format is the same as created by
+     *   xml_parse_into_struct(), but with defaults added and a few derived properties.
+     */
     protected function parseTags(string $xml) : array
     {
         $parser = xml_parser_create();
