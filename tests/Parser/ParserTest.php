@@ -8,7 +8,9 @@ use Crell\Xavier\Classifier\PropertyDefinition;
 use Crell\Xavier\Elements\IllegalAttribute;
 use Crell\Xavier\Elements\XmlElement;
 use Crell\Xavier\NoElementClassFound;
+use Crell\Xavier\NoNamespaceMapDefined;
 use Crell\Xavier\NoPropertyFound;
+use Crell\Xavier\UnknownNamespaceInFile;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -129,7 +131,7 @@ END;
 <myns:thing xmlns:myns="http://example.com/namespace">
     <myns:stuff>
     Stuff goes here.
-</myns:stuff>
+    </myns:stuff>
 </thing>
 END;
 
@@ -178,6 +180,45 @@ END;
         $this->assertInstanceOf("$myNs\\stuff", $result->stuff);
         $this->assertInstanceOf("$yourNs\\beep", $result->stuff->beep);
         $this->assertInstanceOf("$yourNs\\stuff", $result->stuff->stuff);
+    }
+
+    public function test_xml_with_missing_namespace_throws() : void
+    {
+        $this->expectException(UnknownNamespaceInFile::class);
+
+        $xml = <<<END
+<myns:thing xmlns:myns="http://example.com/namespace">
+    <yourns:stuff>
+    Stuff goes here.
+    </yourns:stuff>
+</thing>
+END;
+
+        $phpNs = 'Test\Space';
+
+        $p = new Parser($phpNs);
+        $p->addNamespace('http://example.com/namespace', 'Test\Space');
+
+        $result = $p->parse($xml);
+    }
+
+    public function test_xml_with_missing_namespace_map_throws() : void
+    {
+        $this->expectException(NoNamespaceMapDefined::class);
+
+        $xml = <<<END
+<myns:thing xmlns:myns="http://example.com/namespace">
+    <myns:stuff>
+    Stuff goes here.
+    </myns:stuff>
+</thing>
+END;
+
+        $phpNs = 'Test\Space';
+
+        $p = new Parser($phpNs);
+
+        $result = $p->parse($xml);
     }
 
     public function test_illegal_attribute_is_rejected_on_set() : void

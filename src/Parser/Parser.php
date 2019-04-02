@@ -4,8 +4,10 @@ declare(strict_types=1);
 namespace Crell\Xavier\Parser;
 
 use Crell\Xavier\Elements\XmlElement;
+use Crell\Xavier\NoNamespaceMapDefined;
 use Crell\Xavier\NoElementClassFound;
 use Crell\Xavier\NoPropertyFound;
+use Crell\Xavier\UnknownNamespaceInFile;
 
 class Parser
 {
@@ -182,7 +184,19 @@ class Parser
     protected function mapTagToClass(string $tagName, string $tagNamespace, array $namespaceMap) : string
     {
         // Map the tag namespace to a PHP namespace.
-        $phpNs = $tagNamespace ? $this->namespaces[$namespaceMap[$tagNamespace]] : $this->globalNamespace;
+        if ($tagNamespace) {
+            if (!isset($namespaceMap[$tagNamespace])) {
+                throw UnknownNamespaceInFile::create($tagNamespace);
+            }
+
+            if (!isset($this->namespaces[$namespaceMap[$tagNamespace]])) {
+                throw NoNamespaceMapDefined::create($namespaceMap[$tagNamespace]);
+            }
+            $phpNs = $this->namespaces[$namespaceMap[$tagNamespace]];
+        }
+        else {
+            $phpNs = $this->globalNamespace;
+        }
 
         $className = "{$phpNs}\\{$tagName}";
 
