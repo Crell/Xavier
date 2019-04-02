@@ -19,18 +19,61 @@ class Parser
      */
     protected $strict = false;
 
+    /**
+     * Mapping of XML namespaces (full URLs) to PHP class namespaces.
+     *
+     * @var array
+     */
+    protected $namespaces = [];
+
+    /**
+     * The PHP namespace to use for any non-namespaced XML elements.
+     *
+     * @var string
+     */
+    protected $globalNamespace = '';
+
     public function __construct(bool $strict = false)
     {
         $this->strict = $strict;
     }
 
     /**
+     * Associates an XML namespace with a PHP namespace.
      *
+     * Any elements found in the XML namespace will be mapped to classes
+     * in the PHP namespace.
+     *
+     * @param string $xmlNs
+     *   An XML namespace.  This is a full URL, not just the abbreviation used in the file.
+     * @param string $phpNs
+     *   A PHP namespace.
+     * @return Parser
+     *   The called object.
+     */
+    public function addNamespace(string $xmlNs, string $phpNs) : self
+    {
+        $this->namespaces[$xmlNs] = $phpNs;
+
+        return $this;
+    }
+
+    public function setGlobalNamespace(string $phpNs) : self
+    {
+        $this->globalNamespace = $phpNs;
+        return $this;
+    }
+
+    /**
+     * Parse an XML string into a tree of defined objects.
      *
      * Originally inspired on http://php.net/manual/en/function.xml-parse-into-struct.php#66487
      *
      * @param string $xml
+     *   A well-formed XML string
      * @return XmlElement
+     *   The root element's corresponding object. It practice it will usually be
+     *   a generated subclass of XmlElement.
      */
     public function parse(string $xml) : XmlElement
     {
@@ -39,16 +82,31 @@ class Parser
         // The first element gets special handling, because fence-posting. This makes the code below considerably
         // simpler as it has fewer edge cases to deal with, and we also then always know what the element to return is.
         $tag = array_shift($tags);
-        $className = $this->mapTagToClass($tag['tag']);
-        $rootElement = new $className($tag['tag'], $tag['attributes'], $tag['value']);
+
+        $isNamespaceDefinition = function($key) {
+            return strpos($key, 'xmlns:') !== false;
+        };
+
+        $nsDefs = array_filter($tag['attributes'], $isNamespaceDefinition, \ARRAY_FILTER_USE_KEY);
+
+        $namespaces = [];
+
+        array_walk($nsDefs, function($value, $key) use (&$namespaces) {
+            $nsName = substr($key, strlen('xmlns:'));
+            $namespaces[$nsName] = $value;
+        });
+
+
+        $className = $this->mapTagToClass($tag['name'], $tag['namespace'], $namespaces);
+        $rootElement = new $className($tag['name'], $tag['attributes'], $tag['value']);
 
         $parentStack = [$rootElement];
         foreach ($tags as $tag) {
             $index = count($parentStack);
             if (in_array($tag['type'], ['open', 'complete'])) {
                 // Build new Element.
-                $className = $this->mapTagToClass($tag['tag']);
-                $element = new $className($tag['tag'], $tag['attributes'], $tag['value']);
+                $className = $this->mapTagToClass($tag['name'], $tag['namespace'], $namespaces);
+                $element = new $className($tag['name'], $tag['attributes'], $tag['value']);
 
                 // In strict mode, use reflection to ensure that the parent element has
                 // a properly named property.
@@ -64,7 +122,7 @@ class Parser
                 }
 
                 // Assign this element to a property of the parent element, based on its name.
-                $parentStack[$index - 1]->{$tag['tag']} = $element;
+                $parentStack[$index - 1]->{$tag['name']} = $element;
 
                 // If the element is going to have children, push it onto the stack so the following elements are added
                 // as its children.
@@ -80,14 +138,24 @@ class Parser
         return $rootElement;
     }
 
-    protected function mapTagToClass(string $tag) : string
+    protected function mapTagToClass(string $tagName, string $tagNamespace, array $namespaceMap) : string
     {
-        // If we fall back as far as the default in strict mode, it means there was a missing class element definition.
-        if ($this->strict) {
-            throw NoElementClassFound::create($tag);
+        // Map the tag namespace to a PHP namespace.
+        $phpNs = $tagNamespace ? $this->namespaces[$namespaceMap[$tagNamespace]] : $this->globalNamespace;
+
+        $className = "{$phpNs}\\{$tagName}";
+
+        if (!class_exists($className)) {
+            $className = XmlElement::class;
         }
 
-        return XmlElement::class;
+        // If we fall back as far as the default in strict mode, it means there was a missing class element definition.
+        if ($this->strict && $className == XmlElement::class) {
+            $originalTagName = trim("$tagNamespace:$tagName", ':');
+            throw NoElementClassFound::create($originalTagName);
+        }
+
+        return $className;
     }
 
     protected function parseTags(string $xml) : array
@@ -100,9 +168,18 @@ class Parser
 
         // Ensure all properties are always defined so that we don't have to constantly check for missing values later.
         array_walk($tags, function(&$tag) {
+            if (strpos($tag['tag'], ':') === false) {
+                $tagName = $tag['tag'];
+                $tagNs = '';
+            }
+            else {
+                list($tagNs, $tagName) = explode(':', $tag['tag']);
+            }
             $tag += [
                 'attributes' => [],
                 'value' => '',
+                'name' => $tagName,
+                'namespace' => $tagNs,
             ];
         });
 

@@ -25,7 +25,8 @@ class ParserTest extends TestCase
         $map['shipTo'] = $this->declareElement('shipTo', $ns);
         $map['comment'] = $this->declareElement('comment', $ns);
 
-        $p = $this->makeParser($map);
+        $p = new Parser();
+        $p->setGlobalNamespace($ns);
 
         $filename = __DIR__ . '/../testdata/po.xml';
         $result = $p->parseFile($filename);
@@ -55,7 +56,8 @@ class ParserTest extends TestCase
         $map['billTo'] = $this->declareElement('billTo', $ns);
         $map['shipTo'] = $this->declareElement('shipTo', $ns);
 
-        $p = $this->makeParser($map, true);
+        $p = new Parser(true);
+        $p->setGlobalNamespace($ns);
 
         $filename = __DIR__ . '/../testdata/po.xml';
         $result = $p->parseFile($filename);
@@ -70,7 +72,8 @@ class ParserTest extends TestCase
         $map['purchaseOrder'] = $this->declareElement('purchaseOrder', $ns);
         $map['comment'] = $this->declareElement('comment', $ns);
 
-        $p = $this->makeParser($map, true);
+        $p = new Parser(true);
+        $p->setGlobalNamespace($ns);
 
         $xml = <<<XML
   <purchaseOrder orderDate="1999-10-20">
@@ -89,7 +92,8 @@ XML;
         $map['billTo'] = $this->declareElement('billTo', $ns);
         $map['shipTo'] = $this->declareElement('shipTo', $ns);
 
-        $p = $this->makeParser($map, true);
+        $p = new Parser(true);
+        $p->setGlobalNamespace($ns);
 
         $xml = <<<END
 <?xml version="1.0"?>
@@ -111,7 +115,8 @@ END;
         $ns = 'Test\Space';
         $map['emptyRoot'] = $this->declareElement('emptyRoot', $ns);
 
-        $p = $this->makeParser($map);
+        $p = new Parser();
+        $p->setGlobalNamespace($ns);
 
         $xml = "<emptyRoot a=\"foo\" b=\"bar\" />";
         $result = $p->parse($xml);
@@ -121,39 +126,28 @@ END;
         $this->assertEquals('bar', $result['b']);
     }
 
-    /**
-     * Builds a Parser object for testing.
-     *
-     * This will probably change in the future when I have a better way to define
-     * the schema for a parser other than "extended it and hard code an array."
-     *
-     * @param array $elementMap
-     *   Array of element names to FQCN PHP class names.
-     * @param bool $strict
-     *   Whether the parser should run in strict mode or not.
-     * @return Parser
-     *   A parser to test.
-     */
-    protected function makeParser(array $elementMap, bool $strict = false) : Parser
+    public function test_xml_with_namespaces_parses_to_objects() : void
     {
-        $parser = new class($elementMap, $strict) extends Parser {
-            protected $elementMap;
+        $xml = <<<END
+<myns:thing xmlns:myns="http://example.com/namespace">
+    <myns:stuff>
+    Stuff goes here.
+</myns:stuff>
+</thing>
+END;
 
-            public function __construct(array $elementMap, bool $strict = false)
-            {
-                parent::__construct($strict);
-                $this->elementMap = $elementMap;
-            }
+        $phpNs = 'Test\Space';
+        $map['thing'] = $this->declareElement('thing', $phpNs, ['stuff']);
+        $map['stuff'] = $this->declareElement('stuff', $phpNs);
 
-            protected function mapTagToClass(string $tag): string
-            {
-                $map = $this->elementMap;
+        $p = new Parser();
+        $p->addNamespace('http://example.com/namespace', 'Test\Space');
 
-                return $map[$tag] ?? parent::mapTagToClass($tag);
-            }
-        };
+        $result = $p->parse($xml);
 
-        return $parser;
+        $this->assertInstanceOf("$phpNs\\thing", $result);
+        $this->assertInstanceOf("$phpNs\\stuff", $result->stuff);
+
     }
 
     /**
