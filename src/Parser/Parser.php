@@ -83,24 +83,12 @@ class Parser
         // simpler as it has fewer edge cases to deal with, and we also then always know what the element to return is.
         $tag = array_shift($tags);
 
-        $isNamespaceDefinition = function($key) {
-            return strpos($key, 'xmlns:') !== false;
-        };
-
-        $nsDefs = array_filter($tag['attributes'], $isNamespaceDefinition, \ARRAY_FILTER_USE_KEY);
-
-        $namespaces = [];
-
-        array_walk($nsDefs, function($value, $key) use (&$namespaces) {
-            $nsName = substr($key, strlen('xmlns:'));
-            $namespaces[$nsName] = $value;
-        });
-
+        $namespaces = $this->getDeclaredNamespaces($tag);
 
         $className = $this->mapTagToClass($tag['name'], $tag['namespace'], $namespaces);
         $rootElement = new $className($tag['name'], $tag['attributes'], $tag['value']);
-
         $parentStack = [$rootElement];
+
         foreach ($tags as $tag) {
             $index = count($parentStack);
             if (in_array($tag['type'], ['open', 'complete'])) {
@@ -136,6 +124,42 @@ class Parser
             }
         }
         return $rootElement;
+    }
+
+    /**
+     * Extracts the namespace definitions from a tag.
+     *
+     * @param array $tag
+     *   The tag definition to process.
+     * @return array
+     *   An associative array of namespace short-names to namespace URIs.
+     */
+    protected function getDeclaredNamespaces(array $tag) : array
+    {
+        $namespaces = [];
+
+        $nsDefs = array_filter($tag['attributes'], [$this, 'isNamespaceDefinition'], \ARRAY_FILTER_USE_KEY);
+
+        // We're using array_walk() as a cheap array_map_with_key_support().
+        array_walk($nsDefs, function($value, $key) use (&$namespaces) {
+            $nsName = substr($key, strlen('xmlns:'));
+            $namespaces[$nsName] = $value;
+        });
+
+        return $namespaces;
+    }
+
+    /**
+     * Determines if the specified attribute name string is defining an XML namespace.
+     *
+     * @param string $key
+     *   The XML attribute name.
+     * @return bool
+     *   True if it's a namespace declaration, false otherwise.
+     */
+    protected function isNamespaceDefinition(string $key) : bool
+    {
+        return strpos($key, 'xmlns:') !== false;
     }
 
     protected function mapTagToClass(string $tagName, string $tagNamespace, array $namespaceMap) : string
