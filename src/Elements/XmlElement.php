@@ -20,6 +20,11 @@ class XmlElement implements \ArrayAccess
     protected $_attributes = [];
 
     /**
+     * @var array
+     */
+    protected $_allowedAttributes = [];
+
+    /**
      * The textual body of the element.
      *
      * @var string
@@ -47,11 +52,17 @@ class XmlElement implements \ArrayAccess
 
     public function offsetGet($offset)
     {
+        if ($this->_allowedAttributes && !isset($this->_allowedAttributes[$offset])) {
+            throw IllegalAttribute::create($offset, $this->_name);
+        }
         return $this->_attributes[$offset];
     }
 
     public function offsetSet($offset, $value)
     {
+        if ($this->_allowedAttributes && !isset($this->_allowedAttributes[$offset])) {
+            throw IllegalAttribute::create($offset, $this->_name);
+        }
         $this->_attributes[$offset] = $value;
     }
 

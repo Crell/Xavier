@@ -5,6 +5,7 @@ namespace Crell\Xavier\Parser;
 
 use Crell\Xavier\Classifier\ClassBuilder;
 use Crell\Xavier\Classifier\PropertyDefinition;
+use Crell\Xavier\Elements\IllegalAttribute;
 use Crell\Xavier\Elements\XmlElement;
 use Crell\Xavier\NoElementClassFound;
 use Crell\Xavier\NoPropertyFound;
@@ -20,7 +21,7 @@ class ParserTest extends TestCase
     {
         $ns = 'Test\Space';
         // This is a very incomplete list.
-        $map['purchaseOrder'] = $this->declareElement('purchaseOrder', $ns);
+        $map['purchaseOrder'] = $this->declareElement('purchaseOrder', $ns, ['billTo', 'shipTo']);
         $map['billTo'] = $this->declareElement('billTo', $ns);
         $map['shipTo'] = $this->declareElement('shipTo', $ns);
         $map['comment'] = $this->declareElement('comment', $ns);
@@ -51,7 +52,7 @@ class ParserTest extends TestCase
 
         $ns = 'Test\Space';
         // This is a very incomplete list.
-        $map['purchaseOrder'] = $this->declareElement('purchaseOrder', $ns, ['shipTo', 'billTo']);
+        $map['purchaseOrder'] = $this->declareElement('purchaseOrder', $ns, ['shipTo', 'billTo'], ['orderDate']);
         $map['billTo'] = $this->declareElement('billTo', $ns);
         $map['shipTo'] = $this->declareElement('shipTo', $ns);
 
@@ -178,6 +179,32 @@ END;
         $this->assertInstanceOf("$yourNs\\stuff", $result->stuff->stuff);
     }
 
+    public function test_illegal_attribute_is_rejected_on_set() : void
+    {
+        $this->expectException(IllegalAttribute::class);
+
+        $xml = <<<END
+<myns:thing xmlns:myns="http://example.com/namespace">
+    <myns:stuff myattrib="bob">
+    Stuff goes here.
+</myns:stuff>
+</thing>
+END;
+
+        $phpNs = 'Test\Space';
+        $map['thing'] = $this->declareElement('thing', $phpNs, ['stuff'], ['myattrib']);
+        $map['stuff'] = $this->declareElement('stuff', $phpNs);
+
+        $this->assertClassHasAttribute('_allowedAttributes', 'Test\Space\thing');
+
+        $p = new Parser($phpNs);
+        $p->addNamespace('http://example.com/namespace', 'Test\Space');
+
+        $result = $p->parse($xml);
+
+        $result['fakeattrib'];
+    }
+
     /**
      * Declares a new XmlElement child class into the current process memory.
      *
@@ -186,13 +213,17 @@ END;
      * @param string $namespace
      *   The namespace in which to declare the class.
      * @param array $properties
-     *   The public properties this class should have.
+     *   The public properties this class should have (its child elements).
+     * @param array $attributes
+     *   An array of legal attributes for this element.
      * @return string
      *   The full class name of the just-declared element class.
      */
-    protected function declareElement(string $name, string $namespace, array $properties = []) : string
+    protected function declareElement(string $name, string $namespace, array $properties = [], array $attributes = []) : string
     {
         $b = new ClassBuilder($name, $namespace, XmlElement::class);
+
+        $b->addProperty(new PropertyDefinition('_allowedAttributes', 'protected', 'array', $attributes));
 
         foreach ($properties as $prop) {
             $b->addProperty(new PropertyDefinition($prop));
