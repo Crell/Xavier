@@ -55,9 +55,9 @@ class ParserTest extends TestCase
 
         $ns = 'Test\Space';
         // This is a very incomplete list.
-        $map['purchaseOrder'] = $this->declareElement('purchaseOrder', $ns, ['shipTo', 'billTo'], ['orderDate']);
-        $map['billTo'] = $this->declareElement('billTo', $ns);
-        $map['shipTo'] = $this->declareElement('shipTo', $ns);
+        $this->declareElement('purchaseOrder', $ns, ['shipTo', 'billTo'], ['orderDate']);
+        $this->declareElement('billTo', $ns);
+        $this->declareElement('shipTo', $ns);
 
         $p = new Parser($ns, true);
 
@@ -71,8 +71,8 @@ class ParserTest extends TestCase
 
         $ns = 'Test\Space';
         // This is a very incomplete list.
-        $map['purchaseOrder'] = $this->declareElement('purchaseOrder', $ns);
-        $map['comment'] = $this->declareElement('comment', $ns);
+        $this->declareElement('purchaseOrder', $ns);
+        $this->declareElement('comment', $ns);
 
         $p = new Parser($ns,true);
 
@@ -113,7 +113,7 @@ END;
     public function test_xml_with_empty_root_parses_without_error() : void
     {
         $ns = 'Test\Space';
-        $map['emptyRoot'] = $this->declareElement('emptyRoot', $ns);
+        $this->declareElement('emptyRoot', $ns);
 
         $p = new Parser($ns);
 
@@ -136,8 +136,8 @@ END;
 END;
 
         $phpNs = 'Test\Space';
-        $map['thing'] = $this->declareElement('thing', $phpNs, ['stuff']);
-        $map['stuff'] = $this->declareElement('stuff', $phpNs);
+        $this->declareElement('thing', $phpNs, ['stuff']);
+        $this->declareElement('stuff', $phpNs);
 
         $p = new Parser($phpNs);
         $p->addNamespace('http://example.com/namespace', 'Test\Space');
@@ -234,8 +234,8 @@ END;
 END;
 
         $phpNs = 'Test\Space';
-        $map['thing'] = $this->declareElement('thing', $phpNs, ['stuff'], ['myattrib']);
-        $map['stuff'] = $this->declareElement('stuff', $phpNs);
+        $this->declareElement('thing', $phpNs, ['stuff'], ['myattrib']);
+        $this->declareElement('stuff', $phpNs);
 
         $this->assertClassHasAttribute('_allowedAttributes', 'Test\Space\thing');
 
