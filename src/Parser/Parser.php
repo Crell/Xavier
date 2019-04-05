@@ -117,7 +117,18 @@ class Parser
                 }
 
                 // Assign this element to a property of the parent element, based on its name.
-                $parentStack[$index - 1]->{$tag['name']} = $element;
+                $parent = $parentStack[$index - 1];
+                $attribute = $tag['name'];
+                if (isset($parent->$attribute) && is_array($parent->$attribute)) {
+                    $parent->$attribute[] = $element;
+                }
+                elseif (isset($parent->$attribute) instanceof XmlElement) {
+                    // Upconvert an element to an array if a second of the same name is found.
+                    $parent->$attribute = [$parent->$attribute, $element];
+                }
+                else {
+                    $parent->$attribute = $element;
+                }
 
                 // If the element is going to have children, push it onto the stack so the following elements are added
                 // as its children.

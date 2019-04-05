@@ -247,5 +247,40 @@ END;
         $result['fakeattrib'];
     }
 
+    public function test_multiple_of_a_child_element_works() : void
+    {
+        $xml = <<<END
+<root>
+<name>John Arbuckle</name>
+<publications>
+  <publication>Book 1</publication>
+  <publication>Book 2</publication>
+</publications>
+</root>
+END;
+
+
+        $phpNs = 'Test\Space';
+        $map['publication'] = $this->declareElement('publication', $phpNs);
+        $map['name'] = $this->declareElement('name', $phpNs);
+
+        $class = new ClassBuilder('publications', $phpNs, XmlElement::class);
+        $class->addProperty(new PropertyDefinition('publication', 'public', 'array', []));
+        $map['publications'] = $class->declare();
+
+        $map['root'] = $this->declareElement('root', $phpNs, ['name', 'publications']);
+
+
+        $p = new Parser($phpNs);
+        $result = $p->parse($xml);
+
+        $this->assertInstanceOf($map['root'], $result);
+        $this->assertInstanceOf($map['name'], $result->name);
+        $this->assertInstanceOf($map['publications'], $result->publications);
+        $this->assertIsArray($result->publications->publication);
+        $this->assertCount(2, $result->publications->publication);
+        $this->assertInstanceOf($map['publication'], $result->publications->publication[0]);
+        $this->assertInstanceOf($map['publication'], $result->publications->publication[1]);
+    }
 
 }
