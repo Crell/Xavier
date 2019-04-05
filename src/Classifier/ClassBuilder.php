@@ -82,9 +82,13 @@ END;
      * process. That is a wonderful code injection attack vector unless you're
      * super careful.  Do not let user-provided data anywhere near this class
      * unless you really really know what you're doing.
+     *
+     * @return string
+     *  The FQCN of the class that was just defined.
      */
-    public function declare() : void
+    public function declare() : string
     {
         eval((string)$this);
+        return $this->fqcn();
     }
 }
