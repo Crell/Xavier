@@ -106,4 +106,24 @@ END;
             $this->fail($e->getMessage());
         }
     }
+
+    public function test_falsy_default_values_parse() : void {
+        try {
+            $b = (new ClassBuilder('Foo', 'My\Name\Space'))
+                ->addProperty(new PropertyDefinition('thing', 'public', 'string', ''))
+                ->addProperty(new PropertyDefinition('stuff', 'public', 'int', 0))
+                ->addProperty(new PropertyDefinition('arr', 'public', 'array', []));
+
+            $className = $b->declare();
+
+            $test = new $className();
+
+            $this->assertEquals('', $test->thing);
+            $this->assertEquals(0, $test->stuff);
+            $this->assertEquals([], $test->arr);
+        }
+        catch (\ParseError $e) {
+            $this->fail($e->getMessage());
+        }
+    }
 }
