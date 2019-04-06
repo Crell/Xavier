@@ -93,7 +93,11 @@ class Parser
         $namespaces = $this->getDeclaredNamespaces($tag);
 
         $className = $this->mapTagToClass($tag['name'], $tag['namespace'], $namespaces);
-        $rootElement = new $className($tag['name'], $tag['attributes'], $tag['value']);
+
+        $attributes = array_filter($tag['attributes'], [$this, 'isNotNamespaceDefinition'], \ARRAY_FILTER_USE_KEY);
+
+        $namespace = $namespaces[$tag['namespace']] ?? '';
+        $rootElement = new $className($tag['name'], $attributes, $tag['value'], $namespace, array_flip($namespaces));
         $parentStack = [$rootElement];
 
         foreach ($tags as $tag) {
@@ -101,7 +105,8 @@ class Parser
             if (in_array($tag['type'], ['open', 'complete'])) {
                 // Build new Element.
                 $className = $this->mapTagToClass($tag['name'], $tag['namespace'], $namespaces);
-                $element = new $className($tag['name'], $tag['attributes'], $tag['value']);
+                $namespace = $namespaces[$tag['namespace']] ?? '';
+                $element = new $className($tag['name'], $tag['attributes'], $tag['value'], $namespace);
 
                 // In strict mode, use reflection to ensure that the parent element has
                 // a properly named property.
@@ -178,6 +183,11 @@ class Parser
     protected function isNamespaceDefinition(string $key) : bool
     {
         return strpos($key, 'xmlns:') !== false;
+    }
+
+    protected function isNotNamespaceDefinition(string $key) : bool
+    {
+        return strpos($key, 'xmlns:') === false;
     }
 
     /**

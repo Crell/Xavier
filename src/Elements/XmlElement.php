@@ -5,6 +5,24 @@ namespace Crell\Xavier\Elements;
 
 class XmlElement implements \ArrayAccess
 {
+
+    /**
+     * Map from XML namespace URLs to short namespaces.
+     *
+     * This should only ever be populated on the root element.
+     * The behavior elsewhere is undefined.
+     *
+     * @var array
+     */
+    protected $_namespaces = [];
+
+    /**
+     * The namespace URL of this element.
+     *
+     * @var string
+     */
+    protected $_namespace = '';
+
     /**
      * The tag name of this element.
      *
@@ -31,11 +49,13 @@ class XmlElement implements \ArrayAccess
      */
     protected $_content = '';
 
-    public function __construct($name, array $attributes = [], string $content = '')
+    public function __construct($name, array $attributes = [], string $content = '', string $namespace = '', array $namespaces = [])
     {
         $this->_name = $name;
         $this->_attributes = $attributes;
         $this->_content = $content;
+        $this->_namespace = $namespace;
+        $this->_namespaces = $namespaces;
     }
 
     public function offsetExists($offset)
@@ -74,46 +94,60 @@ class XmlElement implements \ArrayAccess
      *
      * @todo Make the formatting of the string prettier.
      *
+     * @param array $namespaceMap
+     *   A map of namespace URIs to namespace prefixes.
+     *   For internal use only. Do not call.
      * @return string
      */
-    public function export() : string
+    public function export(array $namespaceMap = []) : string
     {
-        $reflO = new \ReflectionObject($this);
+        $namespaceMap = $namespaceMap ? $namespaceMap : $this->_namespaces;
+        $prefix = $namespaceMap ? $namespaceMap[$this->_namespace] : '';
+        $name = $prefix ? "$prefix:$this->_name" : $this->_name;
 
+        $reflO = new \ReflectionObject($this);
         $properties = $reflO->getProperties(\ReflectionProperty::IS_PUBLIC);
 
-        $children = implode(PHP_EOL, array_map([$this, 'exportChild'], $properties));
+        $children = [];
+        /** @var \ReflectionProperty $property */
+        foreach ($properties as $property) {
+            $children[] = $this->exportChild($property, $namespaceMap);
+        }
 
         $attribs = [];
         foreach ($this->_attributes as $key => $value) {
             $attribs[] = "$key=\"$value\"";
         }
 
+        foreach ($this->_namespaces as $url => $tagNs) {
+            $attribs[] = "xmlns:{$tagNs}=\"{$url}\"";
+        }
+
         $attribString = $attribs ? ' ' . implode(' ', $attribs) : '';
 
-        $out = "<{$this->_name}{$attribString}>";
+        $out = "<{$name}{$attribString}>";
 
         if ($children) {
-            $out .= PHP_EOL . $children;
+            $out .= PHP_EOL . implode('', $children);
         }
 
         if ($this->_content) {
             $out .= $this->_content;
         }
 
-        $out .= "</{$this->_name}>" . PHP_EOL;
+        $out .= "</{$name}>" . PHP_EOL;
 
         return $out;
     }
 
-    protected function exportChild(\ReflectionProperty $property) : string
+    protected function exportChild(\ReflectionProperty $property, array $namespaceMap) : string
     {
         $propName = $property->getName();
         if (is_array($this->$propName)) {
-            return implode('', array_map(function(XmlElement $elm) {
-                return $elm->export();
+            return implode('', array_map(function(XmlElement $elm) use ($namespaceMap) {
+                return $elm->export($namespaceMap);
             }, $this->$propName));
         }
-        return $this->$propName->export();
+        return $this->$propName->export($namespaceMap);
     }
 }
