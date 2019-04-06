@@ -122,7 +122,7 @@ class Parser
                 if (isset($parent->$attribute) && is_array($parent->$attribute)) {
                     $parent->$attribute[] = $element;
                 }
-                elseif (isset($parent->$attribute) instanceof XmlElement) {
+                elseif (isset($parent->$attribute) && $parent->$attribute instanceof XmlElement) {
                     // Upconvert an element to an array if a second of the same name is found.
                     $parent->$attribute = [$parent->$attribute, $element];
                 }

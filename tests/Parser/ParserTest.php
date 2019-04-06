@@ -259,7 +259,6 @@ END;
 </root>
 END;
 
-
         $phpNs = 'Test\Space';
         $map['publication'] = $this->declareElement('publication', $phpNs);
         $map['name'] = $this->declareElement('name', $phpNs);
@@ -283,4 +282,26 @@ END;
         $this->assertInstanceOf($map['publication'], $result->publications->publication[1]);
     }
 
+    public function test_multiple_of_a_child_element_without_predefined_classes_works() : void
+    {
+        $xml = <<<END
+<root>
+<name>John Arbuckle</name>
+<publications>
+  <publication>Book 1</publication>
+  <publication>Book 2</publication>
+</publications>
+</root>
+END;
+
+        $phpNs = 'Test\Space';
+
+        $p = new Parser($phpNs);
+        $result = $p->parse($xml);
+
+        $this->assertIsArray($result->publications->publication);
+        $this->assertCount(2, $result->publications->publication);
+        $this->assertInstanceOf(XmlElement::class, $result->publications->publication[0]);
+        $this->assertInstanceOf(XmlElement::class, $result->publications->publication[1]);
+    }
 }
