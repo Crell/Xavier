@@ -31,13 +31,6 @@ class XmlElement implements \ArrayAccess
      */
     protected $_content = '';
 
-    /**
-     * Child elements not otherwise accounted for by a property.
-     *
-     * @var XmlElement[]
-     */
-    public $children = [];
-
     public function __construct($name, array $attributes = [], string $content = '')
     {
         $this->_name = $name;
