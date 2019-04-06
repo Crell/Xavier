@@ -68,4 +68,52 @@ class XmlElement implements \ArrayAccess
     {
         return $this->_content;
     }
+
+    /**
+     * Renders the element tree to a string.
+     *
+     * @todo Make the formatting of the string prettier.
+     *
+     * @return string
+     */
+    public function export() : string
+    {
+        $reflO = new \ReflectionObject($this);
+
+        $properties = $reflO->getProperties(\ReflectionProperty::IS_PUBLIC);
+
+        $children = implode(PHP_EOL, array_map([$this, 'exportChild'], $properties));
+
+        $attribs = [];
+        foreach ($this->_attributes as $key => $value) {
+            $attribs[] = "$key=\"$value\"";
+        }
+
+        $attribString = $attribs ? ' ' . implode(' ', $attribs) : '';
+
+        $out = "<{$this->_name}{$attribString}>";
+
+        if ($children) {
+            $out .= PHP_EOL . $children;
+        }
+
+        if ($this->_content) {
+            $out .= $this->_content;
+        }
+
+        $out .= "</{$this->_name}>" . PHP_EOL;
+
+        return $out;
+    }
+
+    protected function exportChild(\ReflectionProperty $property) : string
+    {
+        $propName = $property->getName();
+        if (is_array($this->$propName)) {
+            return implode('', array_map(function(XmlElement $elm) {
+                return $elm->export();
+            }, $this->$propName));
+        }
+        return $this->$propName->export();
+    }
 }

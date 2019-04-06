@@ -251,11 +251,11 @@ END;
     {
         $xml = <<<END
 <root>
-<name>John Arbuckle</name>
-<publications>
-  <publication>Book 1</publication>
-  <publication>Book 2</publication>
-</publications>
+    <name>John Arbuckle</name>
+    <publications>
+        <publication>Book 1</publication>
+        <publication>Book 2</publication>
+    </publications>
 </root>
 END;
 
@@ -286,11 +286,11 @@ END;
     {
         $xml = <<<END
 <root>
-<name>John Arbuckle</name>
-<publications>
-  <publication>Book 1</publication>
-  <publication>Book 2</publication>
-</publications>
+    <name>John Arbuckle</name>
+    <publications>
+        <publication>Book 1</publication>
+        <publication>Book 2</publication>
+    </publications>
 </root>
 END;
 
