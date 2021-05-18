@@ -4,38 +4,22 @@ declare(strict_types=1);
 namespace Crell\Xavier\Classifier;
 
 
-class PropertyDefinition
+class PropertyDefinition implements \Stringable
 {
-    /** @var string */
-    protected $name;
-
-    /** @var string */
-    protected $visibility = 'public';
-
-    /** @var string */
-    protected $type;
-
-    /** @var mixed */
-    protected $default;
-
-    public function __construct(string $name, string $visibility = 'public', string $type = null, $default = null)
-    {
-        assert(in_array($visibility, ['public', 'private', 'protected']));
-        $this->name = $name;
-        $this->visibility = $visibility;
-        $this->type = $type;
-        $this->default = $default;
+    public function __construct(
+        protected string $name,
+        protected string $visibility = 'public',
+        protected string $type = '',
+        protected mixed $default = null,
+    ) {
+        assert(in_array($visibility, ['public', 'private', 'protected']), 'Visibility must be one of "public", "private", or "protected".');
     }
 
-    public function __toString()
+    public function __toString(): string
     {
         $out = '';
 
-        if ($this->type) {
-            $out .= "/** @var {$this->type} */\n";
-        }
-
-        $out .= "{$this->visibility} \${$this->name}";
+        $out .= "{$this->visibility} {$this->type} \${$this->name}";
 
         if (!is_null($this->default)) {
             $out .= ' = ' . var_export($this->default, true);

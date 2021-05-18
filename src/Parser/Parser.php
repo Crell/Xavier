@@ -11,22 +11,10 @@ use Crell\Xavier\UnknownNamespaceInFile;
 
 class Parser
 {
-
-    /**
-     * True if a missing class or property should throw an exception.
-     *
-     * False to fallback to the generic class and dynamic properties.
-     *
-     * @var bool
-     */
-    protected $strict = false;
-
     /**
      * Mapping of XML namespaces (full URLs) to PHP class namespaces.
-     *
-     * @var array
      */
-    protected $namespaces = [];
+    protected array $namespaces = [];
 
     /**
      * The PHP namespace to use for any non-namespaced XML elements.
@@ -45,10 +33,9 @@ class Parser
      *   If true, missing class or property definitions will result in an exception.
      *   If false, a generic fallback class will be used instead.
      */
-    public function __construct(string $phpNs, bool $strict = false)
+    public function __construct(string $phpNs, protected bool $strict = false)
     {
         $this->globalNamespace = $phpNs;
-        $this->strict = $strict;
     }
 
     /**
@@ -64,10 +51,9 @@ class Parser
      * @return Parser
      *   The called object.
      */
-    public function addNamespace(string $xmlNs, string $phpNs) : self
+    public function addNamespace(string $xmlNs, string $phpNs): static
     {
         $this->namespaces[$xmlNs] = $phpNs;
-
         return $this;
     }
 
@@ -82,7 +68,7 @@ class Parser
      *   The root element's corresponding object. It practice it will usually be
      *   a generated subclass of XmlElement.
      */
-    public function parse(string $xml) : XmlElement
+    public function parse(string $xml): XmlElement
     {
         $tags = $this->parseTags($xml);
 
@@ -137,11 +123,11 @@ class Parser
 
                 // If the element is going to have children, push it onto the stack so the following elements are added
                 // as its children.
-                if ($tag['type'] == 'open') {
+                if ($tag['type'] === 'open') {
                     $parentStack[] = $element;
                 }
             }
-            elseif ($tag['type'] == 'close') {
+            elseif ($tag['type'] === 'close') {
                 // We're done with a child-carrying element, so pop it off the stack.
                 array_pop($parentStack);
             }
@@ -157,7 +143,7 @@ class Parser
      * @return array
      *   An associative array of namespace short-names to namespace URIs.
      */
-    protected function getDeclaredNamespaces(array $tag) : array
+    protected function getDeclaredNamespaces(array $tag): array
     {
         $namespaces = [];
 
@@ -180,14 +166,14 @@ class Parser
      * @return bool
      *   True if it's a namespace declaration, false otherwise.
      */
-    protected function isNamespaceDefinition(string $key) : bool
+    protected function isNamespaceDefinition(string $key): bool
     {
-        return strpos($key, 'xmlns:') !== false;
+        return \str_contains($key, 'xmlns:');
     }
 
-    protected function isNotNamespaceDefinition(string $key) : bool
+    protected function isNotNamespaceDefinition(string $key): bool
     {
-        return strpos($key, 'xmlns:') === false;
+        return !\str_contains($key, 'xmlns:');
     }
 
     /**
@@ -202,7 +188,7 @@ class Parser
      * @return string
      *   The FQCN of the PHP class this tag maps to.
      */
-    protected function mapTagToClass(string $tagName, string $tagNamespace, array $namespaceMap) : string
+    protected function mapTagToClass(string $tagName, string $tagNamespace, array $namespaceMap): string
     {
         // Map the tag namespace to a PHP namespace.
         if ($tagNamespace) {
@@ -245,8 +231,9 @@ class Parser
      *   A nested array of tag definitions.  The format is the same as created by
      *   xml_parse_into_struct(), but with defaults added and a few derived properties.
      */
-    protected function parseTags(string $xml) : array
+    protected function parseTags(string $xml): array
     {
+        $tags = [];
         $parser = xml_parser_create();
         xml_parser_set_option($parser, XML_OPTION_CASE_FOLDING, 0);
         xml_parser_set_option($parser, XML_OPTION_SKIP_WHITE, 1);
@@ -255,12 +242,12 @@ class Parser
 
         // Ensure all properties are always defined so that we don't have to constantly check for missing values later.
         array_walk($tags, function(&$tag) {
-            if (strpos($tag['tag'], ':') === false) {
+            if (!\str_contains($tag['tag'], ':')) {
                 $tagName = $tag['tag'];
                 $tagNs = '';
             }
             else {
-                list($tagNs, $tagName) = explode(':', $tag['tag']);
+                [$tagNs, $tagName] = explode(':', $tag['tag']);
             }
             $tag += [
                 'attributes' => [],
@@ -273,7 +260,7 @@ class Parser
         return $tags;
     }
 
-    public function parseFile(string $filename)
+    public function parseFile(string $filename): XmlElement
     {
         return $this->parse(file_get_contents($filename));
     }

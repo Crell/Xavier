@@ -8,8 +8,7 @@ use Crell\Xavier\Elements\XmlElement;
 
 class TreeGenerator
 {
-    /** @var XmlElement */
-    protected $schemaTree;
+    protected XmlElement $schemaTree;
 
     public function __construct(string $schema)
     {
@@ -17,7 +16,7 @@ class TreeGenerator
         $this->schemaTree = $parser->parse($schema);
     }
 
-    public function generate(string $directory, string $phpNs) : void
+    public function generate(string $directory, string $phpNs): void
     {
 
     }

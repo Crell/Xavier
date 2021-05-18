@@ -7,7 +7,7 @@ use Crell\Xavier\Elements\XmlElement;
 
 class maxExclusive extends XmlElement
 {
-    protected $_allowedAttributes = [
+    protected array $_allowedAttributes = [
         'value',
     ];
 }

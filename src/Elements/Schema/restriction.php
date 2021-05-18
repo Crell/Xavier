@@ -7,7 +7,7 @@ use Crell\Xavier\Elements\XmlElement;
 
 class restriction extends XmlElement
 {
-    protected $_allowedAttributes = [
+    protected array $_allowedAttributes = [
         'base',
     ];
 

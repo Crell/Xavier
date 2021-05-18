@@ -5,51 +5,56 @@ namespace Crell\Xavier\Elements;
 
 class XmlElement implements \ArrayAccess
 {
-
     /**
      * Map from XML namespace URLs to short namespaces.
      *
      * This should only ever be populated on the root element.
      * The behavior elsewhere is undefined.
-     *
-     * @var array
      */
-    protected $_namespaces = [];
+    protected array $_namespaces = [];
 
     /**
      * The namespace URL of this element.
-     *
-     * @var string
      */
-    protected $_namespace = '';
+    protected string $_namespace = '';
 
     /**
      * The tag name of this element.
-     *
-     * @var string
      */
-    protected $_name = '';
+    protected string $_name = '';
 
     /**
      * Attributes on this element.
-     *
-     * @var array
      */
-    protected $_attributes = [];
+    protected array $_attributes = [];
 
     /**
-     * @var array
+     * Attributes allowed on this element.
+     *
+     * An element class may provide this list to forcably prevent invalid attributes from being set.
      */
-    protected $_allowedAttributes = [];
+    protected array $_allowedAttributes = [];
 
     /**
      * The textual body of the element.
-     *
-     * @var string
      */
-    protected $_content = '';
+    protected string $_content = '';
 
-    public function __construct($name, array $attributes = [], string $content = '', string $namespace = '', array $namespaces = [])
+    /**
+     * Constructs a new XlmElement object.
+     *
+     * These properties are defined manually rather than through constructor promotion
+     * so that the constructor arguments can avoid the leading _.  That is necessary
+     * to avoid collision in child classes with child elements of the element represented.
+     * A small price to pay.
+     *
+     * @param string $name
+     * @param array $attributes
+     * @param string $content
+     * @param string $namespace
+     * @param array $namespaces
+     */
+    public function __construct(string $name, array $attributes = [], string $content = '', string $namespace = '', array $namespaces = [])
     {
         $this->_name = $name;
         $this->_attributes = $attributes;
@@ -99,7 +104,7 @@ class XmlElement implements \ArrayAccess
      *   For internal use only. Do not call.
      * @return string
      */
-    public function export(array $namespaceMap = []) : string
+    public function export(array $namespaceMap = []): string
     {
         $namespaceMap = $namespaceMap ? $namespaceMap : $this->_namespaces;
         $prefix = $namespaceMap ? $namespaceMap[$this->_namespace] : '';
@@ -140,13 +145,11 @@ class XmlElement implements \ArrayAccess
         return $out;
     }
 
-    protected function exportChild(\ReflectionProperty $property, array $namespaceMap) : string
+    protected function exportChild(\ReflectionProperty $property, array $namespaceMap): string
     {
         $propName = $property->getName();
         if (is_array($this->$propName)) {
-            return implode('', array_map(function(XmlElement $elm) use ($namespaceMap) {
-                return $elm->export($namespaceMap);
-            }, $this->$propName));
+            return implode('', array_map(fn(XmlElement $elm) => $elm->export($namespaceMap), $this->$propName));
         }
         return $this->$propName->export($namespaceMap);
     }

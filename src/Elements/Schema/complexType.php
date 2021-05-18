@@ -7,7 +7,7 @@ use Crell\Xavier\Elements\XmlElement;
 
 class complexType extends XmlElement
 {
-    protected $_allowedAttributes = [
+    protected array $_allowedAttributes = [
         'name',
     ];
 

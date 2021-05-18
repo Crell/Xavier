@@ -7,7 +7,7 @@ use Crell\Xavier\Elements\XmlElement;
 
 class element extends XmlElement
 {
-    protected $_allowedAttributes = [
+    protected array $_allowedAttributes = [
         'name',
         'type',
         'minOccurs',

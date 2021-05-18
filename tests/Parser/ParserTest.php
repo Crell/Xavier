@@ -20,7 +20,7 @@ class ParserTest extends TestCase
 {
     use ElementUtilities;
 
-    public function test_parser() : void
+    public function test_parser(): void
     {
         $ns = 'Test\Space';
         // This is a very incomplete list.
@@ -49,7 +49,7 @@ class ParserTest extends TestCase
         static::assertEquals('Alice Smith', $result->shipTo->name);
     }
 
-    public function test_strict_mode_rejects_missing_class_definitions() : void
+    public function test_strict_mode_rejects_missing_class_definitions(): void
     {
         $this->expectException(NoElementClassFound::class);
 
@@ -65,7 +65,7 @@ class ParserTest extends TestCase
         $result = $p->parseFile($filename);
     }
 
-    public function test_strict_mode_rejects_missing_property_definitions() : void
+    public function test_strict_mode_rejects_missing_property_definitions(): void
     {
         $this->expectException(NoPropertyFound::class);
 
@@ -85,7 +85,7 @@ XML;
         $result = $p->parse($xml);
     }
 
-    public function test_strict_mode_accepts_fully_defined_classes() : void
+    public function test_strict_mode_accepts_fully_defined_classes(): void
     {
         $ns = 'Test\Space';
         // This is a very incomplete list.
@@ -110,7 +110,7 @@ END;
         static::assertInstanceOf($map['purchaseOrder'], $result);
     }
 
-    public function test_xml_with_empty_root_parses_without_error() : void
+    public function test_xml_with_empty_root_parses_without_error(): void
     {
         $ns = 'Test\Space';
         $this->declareElement('emptyRoot', $ns);
@@ -125,7 +125,7 @@ END;
         static::assertEquals('bar', $result['b']);
     }
 
-    public function test_xml_with_namespaces_parses_to_objects() : void
+    public function test_xml_with_namespaces_parses_to_objects(): void
     {
         $xml = <<<END
 <myns:thing xmlns:myns="http://example.com/namespace">
@@ -148,7 +148,7 @@ END;
         static::assertInstanceOf("$phpNs\\stuff", $result->stuff);
     }
 
-    public function test_xml_with_multiple_namespaces_parses_to_objects() : void
+    public function test_xml_with_multiple_namespaces_parses_to_objects(): void
     {
         $xml = <<<END
 <myns:thing xmlns:myns="http://example.com/namespace" xmlns:yourns="http://example.com/other">
@@ -182,7 +182,7 @@ END;
         static::assertInstanceOf("$yourNs\\stuff", $result->stuff->stuff);
     }
 
-    public function test_xml_with_missing_namespace_throws() : void
+    public function test_xml_with_missing_namespace_throws(): void
     {
         $this->expectException(UnknownNamespaceInFile::class);
 
@@ -202,7 +202,7 @@ END;
         $result = $p->parse($xml);
     }
 
-    public function test_xml_with_missing_namespace_map_throws() : void
+    public function test_xml_with_missing_namespace_map_throws(): void
     {
         $this->expectException(NoNamespaceMapDefined::class);
 
@@ -221,7 +221,7 @@ END;
         $result = $p->parse($xml);
     }
 
-    public function test_illegal_attribute_is_rejected_on_set() : void
+    public function test_illegal_attribute_is_rejected_on_set(): void
     {
         $this->expectException(IllegalAttribute::class);
 
@@ -247,7 +247,7 @@ END;
         $result['fakeattrib'];
     }
 
-    public function test_multiple_of_a_child_element_works() : void
+    public function test_multiple_of_a_child_element_works(): void
     {
         $xml = <<<END
 <root>
@@ -282,7 +282,7 @@ END;
         static::assertInstanceOf($map['publication'], $result->publications->publication[1]);
     }
 
-    public function test_multiple_of_a_child_element_without_predefined_classes_works() : void
+    public function test_multiple_of_a_child_element_without_predefined_classes_works(): void
     {
         $xml = <<<END
 <root>

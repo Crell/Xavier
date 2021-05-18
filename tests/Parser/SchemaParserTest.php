@@ -15,7 +15,7 @@ class SchemaParserTest extends TestCase
 {
     use ElementUtilities;
 
-    public function test_schema() : void
+    public function test_schema(): void
     {
         $p = new SchemaParser();
 

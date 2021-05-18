@@ -68,11 +68,9 @@ END;
         $expected = <<<'END'
 class Foo
 {
-/** @var string */
-public $thing;
+public string $thing;
 
-/** @var int */
-protected $stuff;
+protected int $stuff;
 }
 END;
         static::assertEquals($expected, (string)$b);
@@ -95,7 +93,7 @@ END;
         try {
             $b = (new ClassBuilder('Foo', 'My\Name\Space'))
                 ->addProperty(new PropertyDefinition('thing', 'public', 'string', 'foo'))
-                ->addProperty(new PropertyDefinition('stuff', 'protected', 'int', '5'))
+                ->addProperty(new PropertyDefinition('stuff', 'protected', 'int', 5))
                 ->addProperty(new PropertyDefinition('arr', 'public', 'array', ['foo' => 'bar']));
 
             $b->declare();

@@ -8,48 +8,37 @@ namespace Crell\Xavier\Classifier;
  * @todo Add interfaces
  * @todo Add methods
  */
-class ClassBuilder
+class ClassBuilder implements \Stringable
 {
-    /** @var string */
-    protected $className;
-
-    /** @var string */
-    protected $namespace;
-
-    /** @var string */
-    protected $parent;
 
     /** @var PropertyDefinition[] */
-    protected $properties = [];
+    protected array $properties = [];
 
-    public function __construct(string $className, string $namespace = null, string $parent = null)
-    {
-        $this->className = $className;
-        $this->namespace = $namespace;
-        $this->parent = $parent;
-    }
+    public function __construct(
+        protected string $className,
+        protected ?string $namespace = null,
+        protected ?string $parent = null,
+    ) {}
 
-    public function addProperty(PropertyDefinition $prop) : self
+    public function addProperty(PropertyDefinition $prop): static
     {
         $this->properties[] = $prop;
 
         return $this;
     }
 
-    public function fqcn() : string
+    public function fqcn(): string
     {
         return "\\{$this->namespace}\\{$this->className}";
     }
 
-    protected function stringer($x) : string
+    protected function stringer(mixed $x): string
     {
         return (string)$x;
     }
 
-    public function __toString()
+    public function __toString(): string
     {
-        $out = '';
-
         $props = implode("\n\n", array_map([$this, 'stringer'], $this->properties));
 
         $parent = '';

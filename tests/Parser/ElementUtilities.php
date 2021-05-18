@@ -23,7 +23,7 @@ trait ElementUtilities
      * @return string
      *   The full class name of the just-declared element class.
      */
-    protected function declareElement(string $name, string $namespace, array $properties = [], array $attributes = []) : string
+    protected function declareElement(string $name, string $namespace, array $properties = [], array $attributes = []): string
     {
         $b = new ClassBuilder($name, $namespace, XmlElement::class);
 
@@ -33,8 +33,6 @@ trait ElementUtilities
             $b->addProperty(new PropertyDefinition($prop));
         }
 
-        $b->declare();
-
-        return $b->fqcn();
+        return $b->declare();
     }
 }

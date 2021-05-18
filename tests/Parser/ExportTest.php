@@ -8,7 +8,7 @@ use PHPUnit\Framework\TestCase;
 class ExportTest extends TestCase
 {
 
-    public function test_basic_export_works() : void
+    public function test_basic_export_works(): void
     {
         $xml = <<<END
 <root>
@@ -31,7 +31,7 @@ END;
         static::assertStringContainsString('<name type="full">John Arbuckle</name>', $serialized);
     }
 
-    public function test_exports_with_a_namespace_work() : void
+    public function test_exports_with_a_namespace_work(): void
     {
         $xml = <<<END
 <test:root xmlns:test="http://example.com/test">
