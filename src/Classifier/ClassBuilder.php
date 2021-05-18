@@ -54,11 +54,11 @@ class ClassBuilder
 
         $parent = '';
         if ($this->parent) {
-            $parent = "extends \\{$this->parent}";
+            $parent = " extends \\{$this->parent}";
         }
 
         $out = <<<END
-class {$this->className} {$parent}
+class {$this->className}{$parent}
 {
 {$props}
 }

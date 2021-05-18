@@ -16,13 +16,13 @@ class ClassBuilderTest extends TestCase
         $b = new ClassBuilder('Foo');
 
         $expected = <<<'END'
-class Foo 
+class Foo
 {
 
 }
 END;
 
-        $this->assertEquals($expected, (string)$b);
+        static::assertEquals($expected, (string)$b);
     }
 
     public function test_empty_class_in_namespace_generates_correctly() : void
@@ -31,14 +31,14 @@ END;
 
         $expected = <<<'END'
 namespace My\Name\Space {
-class Foo 
+class Foo
 {
 
 }
 }
 END;
 
-        $this->assertEquals($expected, (string)$b);
+        static::assertEquals($expected, (string)$b);
     }
 
     public function test_parent_class_generates_correctly() : void
@@ -54,7 +54,7 @@ class Foo extends \Some\ParentClass
 }
 }
 END;
-        $this->assertEquals($expected, (string)$b);
+        static::assertEquals($expected, (string)$b);
     }
 
     public function test_properties_generate_correctly() : void
@@ -66,7 +66,7 @@ END;
         ;
 
         $expected = <<<'END'
-class Foo 
+class Foo
 {
 /** @var string */
 public $thing;
@@ -75,7 +75,7 @@ public $thing;
 protected $stuff;
 }
 END;
-        $this->assertEquals($expected, (string)$b);
+        static::assertEquals($expected, (string)$b);
     }
 
     public function test_eval_of_generated_class_parses() : void
@@ -86,8 +86,8 @@ END;
 
         $b->declare();
 
-        $this->assertClassHasAttribute('thing', 'My\Name\Space\Foo');
-        $this->assertClassHasAttribute('stuff', 'My\Name\Space\Foo');
+        static::assertClassHasAttribute('thing', 'My\Name\Space\Foo');
+        static::assertClassHasAttribute('stuff', 'My\Name\Space\Foo');
     }
 
     public function test_default_value_parses() : void
@@ -100,10 +100,10 @@ END;
 
             $b->declare();
 
-            $this->assertClassHasAttribute('thing', 'My\Name\Space\Foo');
+            static::assertClassHasAttribute('thing', 'My\Name\Space\Foo');
         }
         catch (\ParseError $e) {
-            $this->fail($e->getMessage());
+            static::fail($e->getMessage());
         }
     }
 
@@ -118,12 +118,12 @@ END;
 
             $test = new $className();
 
-            $this->assertEquals('', $test->thing);
-            $this->assertEquals(0, $test->stuff);
-            $this->assertEquals([], $test->arr);
+            static::assertEquals('', $test->thing);
+            static::assertEquals(0, $test->stuff);
+            static::assertEquals([], $test->arr);
         }
         catch (\ParseError $e) {
-            $this->fail($e->getMessage());
+            static::fail($e->getMessage());
         }
     }
 }

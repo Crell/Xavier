@@ -34,19 +34,19 @@ class ParserTest extends TestCase
         $filename = __DIR__ . '/../testdata/po.xml';
         $result = $p->parseFile($filename);
 
-        $this->assertInstanceOf($map['purchaseOrder'], $result);
-        $this->assertEquals('1999-10-20', $result['orderDate']);
-        $this->assertEquals('', (string)$result);
+        static::assertInstanceOf($map['purchaseOrder'], $result);
+        static::assertEquals('1999-10-20', $result['orderDate']);
+        static::assertEquals('', (string)$result);
 
         // The defined elements get mapped to their class.
-        $this->assertInstanceOf($map['shipTo'], $result->shipTo);
-        $this->assertInstanceOf($map['billTo'], $result->billTo);
-        $this->assertInstanceOf($map['comment'], $result->comment);
-        $this->assertEquals('Hurry, my lawn is going wild', $result->comment);
+        static::assertInstanceOf($map['shipTo'], $result->shipTo);
+        static::assertInstanceOf($map['billTo'], $result->billTo);
+        static::assertInstanceOf($map['comment'], $result->comment);
+        static::assertEquals('Hurry, my lawn is going wild', $result->comment);
 
         // Undefined elements get mapped to the parent XmlElement class.
-        $this->assertInstanceOf(XmlElement::class, $result->shipTo->name);
-        $this->assertEquals('Alice Smith', $result->shipTo->name);
+        static::assertInstanceOf(XmlElement::class, $result->shipTo->name);
+        static::assertEquals('Alice Smith', $result->shipTo->name);
     }
 
     public function test_strict_mode_rejects_missing_class_definitions() : void
@@ -107,7 +107,7 @@ END;
 
         $result = $p->parse($xml);
 
-        $this->assertInstanceOf($map['purchaseOrder'], $result);
+        static::assertInstanceOf($map['purchaseOrder'], $result);
     }
 
     public function test_xml_with_empty_root_parses_without_error() : void
@@ -120,9 +120,9 @@ END;
         $xml = "<emptyRoot a=\"foo\" b=\"bar\" />";
         $result = $p->parse($xml);
 
-        $this->assertInstanceOf("{$ns}\\emptyRoot", $result);
-        $this->assertEquals('foo', $result['a']);
-        $this->assertEquals('bar', $result['b']);
+        static::assertInstanceOf("{$ns}\\emptyRoot", $result);
+        static::assertEquals('foo', $result['a']);
+        static::assertEquals('bar', $result['b']);
     }
 
     public function test_xml_with_namespaces_parses_to_objects() : void
@@ -144,8 +144,8 @@ END;
 
         $result = $p->parse($xml);
 
-        $this->assertInstanceOf("$phpNs\\thing", $result);
-        $this->assertInstanceOf("$phpNs\\stuff", $result->stuff);
+        static::assertInstanceOf("$phpNs\\thing", $result);
+        static::assertInstanceOf("$phpNs\\stuff", $result->stuff);
     }
 
     public function test_xml_with_multiple_namespaces_parses_to_objects() : void
@@ -176,10 +176,10 @@ END;
 
         $result = $p->parse($xml, true);
 
-        $this->assertInstanceOf("$myNs\\thing", $result);
-        $this->assertInstanceOf("$myNs\\stuff", $result->stuff);
-        $this->assertInstanceOf("$yourNs\\beep", $result->stuff->beep);
-        $this->assertInstanceOf("$yourNs\\stuff", $result->stuff->stuff);
+        static::assertInstanceOf("$myNs\\thing", $result);
+        static::assertInstanceOf("$myNs\\stuff", $result->stuff);
+        static::assertInstanceOf("$yourNs\\beep", $result->stuff->beep);
+        static::assertInstanceOf("$yourNs\\stuff", $result->stuff->stuff);
     }
 
     public function test_xml_with_missing_namespace_throws() : void
@@ -237,7 +237,7 @@ END;
         $this->declareElement('thing', $phpNs, ['stuff'], ['myattrib']);
         $this->declareElement('stuff', $phpNs);
 
-        $this->assertClassHasAttribute('_allowedAttributes', 'Test\Space\thing');
+        static::assertClassHasAttribute('_allowedAttributes', 'Test\Space\thing');
 
         $p = new Parser($phpNs);
         $p->addNamespace('http://example.com/namespace', 'Test\Space');
@@ -273,13 +273,13 @@ END;
         $p = new Parser($phpNs);
         $result = $p->parse($xml);
 
-        $this->assertInstanceOf($map['root'], $result);
-        $this->assertInstanceOf($map['name'], $result->name);
-        $this->assertInstanceOf($map['publications'], $result->publications);
-        $this->assertIsArray($result->publications->publication);
-        $this->assertCount(2, $result->publications->publication);
-        $this->assertInstanceOf($map['publication'], $result->publications->publication[0]);
-        $this->assertInstanceOf($map['publication'], $result->publications->publication[1]);
+        static::assertInstanceOf($map['root'], $result);
+        static::assertInstanceOf($map['name'], $result->name);
+        static::assertInstanceOf($map['publications'], $result->publications);
+        static::assertIsArray($result->publications->publication);
+        static::assertCount(2, $result->publications->publication);
+        static::assertInstanceOf($map['publication'], $result->publications->publication[0]);
+        static::assertInstanceOf($map['publication'], $result->publications->publication[1]);
     }
 
     public function test_multiple_of_a_child_element_without_predefined_classes_works() : void
@@ -299,9 +299,9 @@ END;
         $p = new Parser($phpNs);
         $result = $p->parse($xml);
 
-        $this->assertIsArray($result->publications->publication);
-        $this->assertCount(2, $result->publications->publication);
-        $this->assertInstanceOf(XmlElement::class, $result->publications->publication[0]);
-        $this->assertInstanceOf(XmlElement::class, $result->publications->publication[1]);
+        static::assertIsArray($result->publications->publication);
+        static::assertCount(2, $result->publications->publication);
+        static::assertInstanceOf(XmlElement::class, $result->publications->publication[0]);
+        static::assertInstanceOf(XmlElement::class, $result->publications->publication[1]);
     }
 }

@@ -23,11 +23,11 @@ class SchemaParserTest extends TestCase
         /** @var schema $result */
         $result = $p->parseFile($filename);
 
-        $this->assertInstanceOf(schema::class, $result);
-        $this->assertInstanceOf(annotation::class, $result->annotation);
-        $this->assertIsArray($result->complexType);
-        $this->assertCount(3, $result->complexType);
-        $this->assertInstanceOf(complexType::class, $result->complexType[0]);
+        static::assertInstanceOf(schema::class, $result);
+        static::assertInstanceOf(annotation::class, $result->annotation);
+        static::assertIsArray($result->complexType);
+        static::assertCount(3, $result->complexType);
+        static::assertInstanceOf(complexType::class, $result->complexType[0]);
     }
 
 }

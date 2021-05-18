@@ -25,10 +25,10 @@ END;
 
         $serialized = $result->export();
 
-        $this->assertStringContainsString('<root>', $serialized);
-        $this->assertStringContainsString('<publication>Book 1</publication>', $serialized);
-        $this->assertStringContainsString('<publication>Book 2</publication>', $serialized);
-        $this->assertStringContainsString('<name type="full">John Arbuckle</name>', $serialized);
+        static::assertStringContainsString('<root>', $serialized);
+        static::assertStringContainsString('<publication>Book 1</publication>', $serialized);
+        static::assertStringContainsString('<publication>Book 2</publication>', $serialized);
+        static::assertStringContainsString('<name type="full">John Arbuckle</name>', $serialized);
     }
 
     public function test_exports_with_a_namespace_work() : void
@@ -49,9 +49,9 @@ END;
 
         $serialized = $result->export();
 
-        $this->assertStringContainsString('<test:root xmlns:test="http://example.com/test">', $serialized);
-        $this->assertStringContainsString('<test:publication>Book 1</test:publication>', $serialized);
-        $this->assertStringContainsString('<test:publication>Book 2</test:publication>', $serialized);
-        $this->assertStringContainsString('<test:name type="full">John Arbuckle</test:name>', $serialized);
+        static::assertStringContainsString('<test:root xmlns:test="http://example.com/test">', $serialized);
+        static::assertStringContainsString('<test:publication>Book 1</test:publication>', $serialized);
+        static::assertStringContainsString('<test:publication>Book 2</test:publication>', $serialized);
+        static::assertStringContainsString('<test:name type="full">John Arbuckle</test:name>', $serialized);
     }
 }
