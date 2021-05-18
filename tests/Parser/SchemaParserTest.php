@@ -17,7 +17,6 @@ class SchemaParserTest extends TestCase
 
     public function test_schema() : void
     {
-        $ns = '';
         $p = new SchemaParser();
 
         $filename = __DIR__ . '/../testdata/po.xsd';
